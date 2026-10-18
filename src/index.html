@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#050507">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>芭蕾舞女鬼 · 房子</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="stage">
+  <canvas id="scene"></canvas>
+
+  <div class="post lens"></div>
+  <div class="post grain"></div>
+  <div class="post scan"></div>
+  <div class="post vignette" id="vignette"></div>
+  <div class="post distorted" id="distorted"></div>
+  <div id="blood"></div>
+  <div id="hideOverlay"></div>
+  <div id="whiteout"></div>
+  <div id="jumpscare"><canvas id="face"></canvas></div>
+
+  <div id="hud" class="hidden">
+    <div class="hud-top-left">
+      <div class="rec"><span class="recdot"></span>REC <span id="tc">00:00:00</span></div>
+      <div class="loc">无名住宅 · 一楼</div>
+    </div>
+    <div class="hud-top-right">
+      <div class="surv"><span id="surv">00:00</span><em>存活</em></div>
+      <div class="night">第 <b id="lv">1</b> 阶段</div>
+    </div>
+
+    <div class="compass" id="compass">
+      <div class="compass-ring"></div>
+      <div class="compass-needle" id="needle"></div>
+      <div class="compass-dist" id="cdisp">--</div>
+      <div class="compass-label">发条感应</div>
+    </div>
+
+    <div class="crosshair" id="crosshair"><i></i></div>
+
+    <div class="hud-bottom-left">
+      <div class="meter"><span class="mlabel">凝视</span><div class="bar"><i id="mstamina"></i></div></div>
+      <div class="meter"><span class="mlabel">体力</span><div class="bar breath"><i id="mbreath"></i></div></div>
+      <div class="meter"><span class="mlabel">电量</span><div class="bar batt"><i id="mbattery"></i></div></div>
+      <div class="dist" id="distText">最近假人 -- m</div>
+      <div class="ecg"><canvas id="ecg" width="132" height="34"></canvas><span id="bpm">72 BPM</span></div>
+    </div>
+
+    <div class="hud-bottom-right">
+      <div class="keys"><span class="keyicon">✦</span><b id="keyc">0</b><span class="keyslash">/5</span></div>
+      <div class="keys-label">发条</div>
+      <div class="charm" id="charm"><i></i><span>护身符 ×1</span></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <div class="phase-text" id="phaseText"></div>
+    <div class="hint" id="hint">左摇杆移动 · 右半屏拖动环视</div>
+
+    <div class="hud-actions">
+      <button class="iconbtn" id="btnPause" aria-label="暂停">Ⅱ</button>
+      <button class="iconbtn" id="btnMute" aria-label="静音">♪</button>
+      <button class="iconbtn" id="btnFull" aria-label="全屏">⛶</button>
+    </div>
+  </div>
+
+  <div id="touch" class="hidden">
+    <div id="stick"><div class="stick-ring"></div><div id="knob"></div></div>
+    <div class="touch-right">
+      <button id="btnBreath" class="tbtn breath">屏息</button>
+      <button id="btnSprint" class="tbtn sprint">冲刺</button>
+      <button id="btnLight" class="tbtn light on">手电</button>
+    </div>
+  </div>
+  <button id="btnHide" class="context hidden">躲藏</button>
+
+  <div id="menu" class="screen">
+    <div class="menu-ghost"><canvas id="menuGhost" width="280" height="560"></canvas></div>
+    <div class="menu-inner">
+      <div class="casefile">CASE 0714 <span>／ 失踪报告已恢复</span></div>
+      <h1>芭蕾舞女鬼</h1>
+      <div class="sub">房 子 <span>THE&nbsp;HOUSE</span></div>
+      <p class="tagline">“她附身了其中一个假人。别移开视线。”</p>
+
+      <div class="warn">
+        <b>警告</b>
+        本作包含突然惊吓、闪烁画面与强烈音效。建议佩戴耳机。<br>心脏不适、光敏性癫痫者请勿游玩。
+      </div>
+
+      <div class="menu-buttons">
+        <button id="btnStart" class="primary">进 入 剧 院</button>
+        <button id="btnHelp" class="ghostbtn">操作与说明</button>
+      </div>
+
+      <div class="menu-opts">
+        <div class="opt-row"><span>画质</span>
+          <div class="seg" id="qualitySeg">
+            <button data-q="0">流畅</button><button data-q="1" class="on">标准</button><button data-q="2">极致</button>
+          </div>
+        </div>
+        <div class="opt-row"><span>亮度</span>
+          <div class="seg" id="brightSeg">
+            <button data-b="0">暗</button><button data-b="1" class="on">标准</button><button data-b="2">亮</button>
+          </div>
+        </div>
+        <div class="opt-row"><span>音效</span>
+          <div class="seg" id="soundSeg">
+            <button data-s="1" class="on">开</button><button data-s="0">关</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="menu-foot">
+        <span>建议横屏 · 双击按钮可全屏</span>
+        <span id="ver">v1.0 · 离线单文件</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="intro" class="screen hidden">
+    <div class="intro-box">
+      <div class="intro-time">凌晨 02:17</div>
+      <div class="intro-line"></div>
+      <div class="intro-name">一间没有灯的房间</div>
+      <div class="intro-story">五个假人站在黑暗里。<br>聚光灯亮起时，她在其中一个里面。</div>
+      <div class="intro-skip">轻触继续</div>
+    </div>
+  </div>
+
+  <div id="help" class="screen modal hidden">
+    <div class="modal-box">
+      <h2>操作与生还须知</h2>
+      <div class="help-grid">
+        <div class="help-item"><b>左摇杆 / WASD</b><span>后退、绕圈，拉开距离</span></div>
+        <div class="help-item"><b>右半屏 / 鼠标</b><span>始终盯住带聚光灯的假人</span></div>
+        <div class="help-item"><b>冲刺</b><span>被逼近时用，注意体力</span></div>
+        <div class="help-item"><b>聚光灯</b><span>光柱下的假人就是她</span></div>
+        <div class="help-item"><b>凝视</b><span>移开视线约 2 秒会直接死亡</span></div>
+        <div class="help-item"><b>换人</b><span>光柱会突然移到另一个假人</span></div>
+      </div>
+      <p class="help-note">房间漆黑，只能看见五个白色假人。<b>聚光灯照到谁，谁就会跳着舞向你逼近</b>。你要一直正视它、后退绕圈，坚持 <b>75 秒</b> 到天亮。被它贴到，或移开视线超过约两秒，都会立即死亡。每 15 秒难度提升，她换人更快、逼近速度也更快。</p>
+      <p class="help-note dim">没有护身符，没有第二次。别转身跑——你可以后退，但视线必须留在她身上。</p>
+      <p class="help-note dim">桌面端：WASD 移动，鼠标环视，Shift 冲刺，空格屏息，F 手电，Esc 暂停。点击画面锁定鼠标。</p>
+      <button id="btnHelpClose" class="primary small">知道了</button>
+    </div>
+  </div>
+
+  <div id="pause" class="screen modal hidden">
+    <div class="modal-box narrow">
+      <h2>暂停</h2>
+      <p class="pause-line">八音盒停了。<br>她还在客厅。</p>
+      <canvas id="map" width="300" height="300"></canvas>
+      <div class="map-legend">
+        <span><i class="dot you"></i>你</span>
+        <span><i class="dot keydot"></i>发条</span>
+        <span><i class="dot exitdot"></i>出口</span>
+      </div>
+      <div class="pause-meta" id="pauseMeta">发条 0/5 · 第 1 夜 · 00:00</div>
+      <button id="btnResume" class="primary small">继续</button>
+      <button id="btnPauseHelp" class="ghostbtn small">说明</button>
+      <button id="btnQuit" class="ghostbtn small danger">放弃并返回</button>
+    </div>
+  </div>
+
+  <div id="over" class="screen hidden">
+    <div class="over-box">
+      <div class="over-tag">SIGNAL LOST</div>
+      <h2 id="overTitle">你被留在了那栋房子里</h2>
+      <p id="overSub">录像到此为止。</p>
+      <div class="stats">
+        <div><em>存活</em><b id="stTime">00:00</b></div>
+        <div><em>阶段</em><b id="stLv">1</b></div>
+        <div><em>凝视</em><b id="stKeys">100%</b></div>
+      </div>
+      <button id="btnRetry" class="primary">再 来 一 次</button>
+      <button id="btnMenu" class="ghostbtn">回到标题</button>
+    </div>
+  </div>
+
+  <div id="win" class="screen hidden">
+    <div class="over-box win-box">
+      <div class="over-tag">TAPE ENDS</div>
+      <h2>你撑到了天亮</h2>
+      <p>聚光灯熄灭了。黑暗里只剩下五个假人。</p>
+      <div class="stats">
+        <div><em>存活</em><b id="wnTime">00:00</b></div>
+        <div><em>阶段</em><b id="wnLv">1</b></div>
+        <div><em>评价</em><b id="wnRank">B</b></div>
+      </div>
+      <button id="btnAgain" class="primary">再 进 一 次</button>
+      <button id="btnWinMenu" class="ghostbtn">回到标题</button>
+    </div>
+  </div>
+
+  <div id="rotateHint">横屏视野更宽 · 建议横屏游玩</div>
+</div>
+
+<script src="audio.js"></script>
+<script src="art.js"></script>
+<script src="engine.js"></script>
+</body>
+</html>
